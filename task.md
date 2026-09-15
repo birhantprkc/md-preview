@@ -1,3 +1,21 @@
+# Apple 下载与生成下架（2026-09-15）
+
+## 范围与验收
+
+- 下架官网、README 的 macOS/iOS/iPadOS 下载；中英文、390px/1440px 页面均正确。
+- 移除历史 GitHub Release 的 Apple 安装包及 appcast，保留其他平台附件。
+- CI/Release 仅生成 Windows/Linux；手机发布仅生成 Android；旧 Apple 打包、签名、appcast 入口直接拒绝执行。
+- 保留 Apple 应用源码与用户已有改动；不操作开发者账号权限。
+
+## 验证
+
+- `python3 scripts/verify-distribution.py` 通过；Apple 打包/签名入口实际运行后以退出码 1 拒绝，未启动构建或签名。
+- shell 语法、截图生成脚本语法与 `git diff --check` 通过。
+- Playwright 390px/1440px：页面加载、中英文切换、下载按钮、三平台安装说明、无横向溢出和脚本错误均通过。
+- GitHub Release 24 个 Apple 附件已删除；按附件 ID 核对，31 个其他平台附件完整保留。
+
+---
+
 # 已完成：审查 #39–#43、修复并发布
 
 ## 目标与范围

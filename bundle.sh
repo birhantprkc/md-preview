@@ -1,4 +1,6 @@
 #!/bin/bash
+echo "Apple distribution and package generation are suspended." >&2
+exit 1
 set -e
 
 APP_NAME="MD Preview"

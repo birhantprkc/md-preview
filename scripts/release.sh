@@ -14,16 +14,14 @@ usage() {
     '' \
     'Runs the desktop release flow in the foreground:' \
     '  1. verifies the workspace and version' \
-    '  2. pushes master and the tag while skipping the background pre-push signer' \
+    '  2. pushes master and the tag' \
     '  3. waits for the GitHub Release workflow' \
-    '  4. signs/notarizes/staples the macOS DMG' \
-    '  5. verifies Release assets, Gatekeeper, and Sparkle appcast' \
+    '  4. verifies Windows and Linux Release assets' \
     '' \
     'Environment:' \
     '  SKIP_VERIFY=1                    skip ./scripts/verify.sh' \
     '  MD_PREVIEW_GITHUB_REPO=owner/repo override GitHub repo' \
-    '  MD_PREVIEW_SIGN_SCRIPT=path       override local-first signing script' \
-    '  MD_PREVIEW_SIGN_ATTEMPTS=N        signing attempts before failing (default: 2)' >&2
+    >&2
 }
 
 if [ "${TAG:-}" = "-h" ] || [ "${TAG:-}" = "--help" ]; then
@@ -69,7 +67,7 @@ require_master_branch() {
 
 require_tools() {
   local missing=0
-  for tool in git gh curl xcrun codesign spctl; do
+  for tool in git gh; do
     if ! command -v "$tool" >/dev/null 2>&1; then
       echo "error: required tool missing: $tool" >&2
       missing=1
@@ -120,9 +118,7 @@ find_release_run() {
 
 require_release_assets() {
   local expected=(
-    appcast.xml
     MD-Preview-linux-x64.tar.gz
-    MD-Preview-macOS-universal.dmg
     MD-Preview-windows-x64.exe
   )
   local assets
@@ -136,22 +132,6 @@ require_release_assets() {
   done
 }
 
-verify_signed_outputs() {
-  local dmg="target/MD-Preview-macOS-universal.dmg"
-  local app="target/MD Preview.app"
-  local finder_extension="$app/Contents/PlugIns/MDPreviewFinderExtension.appex"
-
-  test -f "$dmg"
-  test -d "$app"
-  xcrun stapler validate "$dmg"
-  codesign --verify --deep --strict --verbose=2 "$app"
-  codesign -d --entitlements :- "$finder_extension" 2>&1 \
-    | grep -q 'com.apple.security.app-sandbox'
-  spctl -a -t open --context context:primary-signature "$dmg"
-
-  curl -fsSL "https://github.com/$REPO/releases/latest/download/appcast.xml" \
-    | grep -E "MD Preview $VERSION|$TAG/MD-Preview-macOS-universal\\.dmg|sparkle:edSignature"
-}
 
 require_tools
 require_master_branch
@@ -174,15 +154,7 @@ RUN_ID="$(find_release_run)"
 echo "[release] watching GitHub Actions run $RUN_ID"
 gh run watch "$RUN_ID" -R "$REPO" --exit-status
 
-LOG="target/release-sign-$TAG.log"
-mkdir -p target
-echo "[release] signing macOS DMG in foreground; log: $LOG"
-./release-sign.sh "$TAG" 2>&1 | tee "$LOG"
-
-echo "[release] verifying published assets and signed outputs"
+echo "[release] verifying published assets"
 require_release_assets
-verify_signed_outputs
-
-echo ""
-echo "DONE. $TAG released, signed, notarized, stapled, and verified."
+echo "DONE. $TAG released and verified (Windows / Linux)."
 echo "Release: https://github.com/$REPO/releases/tag/$TAG"

@@ -1,3 +1,5 @@
+> iOS 下载及构建发布已暂停；保留源码供参考。
+
 # MD Preview Mobile
 
 手机端 MVP 目标是快速只读预览 Markdown 文件，重点覆盖从微信、企业微信、Files/文件管理器或系统分享面板打开 `.md` 文档。
@@ -11,11 +13,6 @@
 ## Build
 
 ```bash
-# iOS project
-cd mobile/ios
-xcodegen generate
-xcodebuild -project MDPreviewMobile.xcodeproj -scheme MDPreviewMobile -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
-
 # Android
 cd mobile/android
 gradle :app:assembleDebug
@@ -28,7 +25,7 @@ gradle :app:assembleDebug
 # .env.mobile-release and mobile/android/signing/md-preview-upload.keystore
 mobile/scripts/generate-android-upload-keystore.sh
 
-# Build signed Android APK/AAB and generate/check the iOS project.
+# Build signed Android APK/AAB (Apple builds are suspended).
 mobile/scripts/build-release.sh
 
 # Release readiness checks used by the root verify script.

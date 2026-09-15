@@ -1,12 +1,13 @@
 # MD Preview
 
+> Apple platform (macOS / iOS / iPadOS) downloads, package builds, and signing are suspended. Apple features described below refer to retained source code only.
+
 **English · [简体中文](README_zh.md)**
 
 [![GitHub stars](https://img.shields.io/github/stars/vorojar/md-preview)](https://github.com/vorojar/md-preview/stargazers)
 [![Release](https://img.shields.io/github/v/release/vorojar/md-preview)](https://github.com/vorojar/md-preview/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux%20%7C%20iOS%20%7C%20Android-lightgrey)](https://github.com/vorojar/md-preview/releases)
-[![App Store](https://img.shields.io/badge/App%20Store-Local%20Markdown%20Preview-blue?logo=appstore)](https://apps.apple.com/cn/app/local-markdown-preview/id6779451523)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android-lightgrey)](https://github.com/vorojar/md-preview/releases)
 [![Binary size](https://img.shields.io/badge/binary-~5MB-green)](https://github.com/vorojar/md-preview/releases)
 
 > Multiple Markdown files, one lightweight window. Follow local document links, inspect counts, zoom the page, and edit with automatic save—without launching a whole IDE.
@@ -45,13 +46,11 @@ Get the latest build from [GitHub Releases](https://github.com/vorojar/md-previe
 
 | Platform | Package | Notes |
 |---|---|---|
-| macOS | `MD-Preview-macOS-universal.dmg` | Universal app for Apple Silicon and Intel. Releases are signed and notarized. |
 | Windows | `MD-Preview-windows-x64.exe` | Single-file app. The in-app updater downloads the next exe, verifies its SHA-256 digest, replaces itself, and relaunches. |
 | Linux | `MD-Preview-linux-x64.tar.gz` | Requires the system WebKitGTK runtime. |
-| iOS / iPadOS | [Local Markdown Preview on the App Store](https://apps.apple.com/cn/app/local-markdown-preview/id6779451523) | Native iPhone and iPad viewer for opening Markdown from Files and the iOS share sheet. |
 | Android | `MD-Preview-Android.apk` | Native Android viewer for opening Markdown files from Files, WeChat, WeCom, and share sheets. |
 
-Android builds are published as separate mobile releases, for example [mobile-android-v1.0.10](https://github.com/vorojar/md-preview/releases/tag/mobile-android-v1.0.10). The iOS build is now available on the App Store as [Local Markdown Preview](https://apps.apple.com/cn/app/local-markdown-preview/id6779451523).
+Android builds are published as separate mobile releases, for example [mobile-android-v1.0.10](https://github.com/vorojar/md-preview/releases/tag/mobile-android-v1.0.10).
 
 You can also build from source:
 
@@ -60,14 +59,6 @@ git clone https://github.com/vorojar/md-preview.git
 cd md-preview
 cargo build --release
 ./target/release/md-preview README.md
-```
-
-To create the macOS `.app` bundle locally:
-
-```bash
-chmod +x bundle.sh
-./bundle.sh
-cp -r "target/MD Preview.app" /Applications/
 ```
 
 ## Usage
@@ -215,7 +206,7 @@ cargo test
 cargo build --release
 ```
 
-CI builds macOS, Windows, and Linux. Release tags matching `v*` produce a macOS DMG, standalone Windows EXE, and Linux tarball through GitHub Actions.
+CI and release builds cover Windows and Linux. Android is released separately.
 
 Maintainer release flow:
 
@@ -223,7 +214,7 @@ Maintainer release flow:
 scripts/release.sh v1.2.3
 ```
 
-The script runs verification, pushes `master` and the tag, waits for GitHub Actions, signs/notarizes/staples the macOS DMG in the foreground, uploads `appcast.xml`, and verifies the final Release assets.
+The script runs verification, pushes `master` and the tag, waits for GitHub Actions, and verifies Windows and Linux assets.
 
 ## License
 

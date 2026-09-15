@@ -18,11 +18,6 @@ fail() {
 
 echo "[release-readiness] root: $ROOT"
 
-test -f mobile/ios/MDPreviewMobile/PrivacyInfo.xcprivacy || fail "missing iOS privacy manifest"
-plutil -lint mobile/ios/MDPreviewMobile/Info.plist mobile/ios/MDPreviewMobile/PrivacyInfo.xcprivacy >/dev/null
-python3 -m json.tool mobile/ios/MDPreviewMobile/Assets.xcassets/Contents.json >/dev/null
-python3 -m json.tool mobile/ios/MDPreviewMobile/Assets.xcassets/AppIcon.appiconset/Contents.json >/dev/null
-
 ANDROID_ACTIVITY="mobile/android/app/src/main/java/app/mdpreview/mobile/MainActivity.java"
 grep -F 'intent.setType("text/*")' "$ANDROID_ACTIVITY" >/dev/null || fail "Android Open File picker must request text MIME"
 if grep -F 'intent.setType("*/*")' "$ANDROID_ACTIVITY" >/dev/null; then
@@ -63,18 +58,4 @@ else
   echo "[release-readiness] Android signing env not set; release artifacts are buildable but not store-uploadable"
 fi
 
-if command -v xcodegen >/dev/null 2>&1; then
-  echo "[release-readiness] iOS project generation"
-  (cd mobile/ios && xcodegen generate)
-else
-  fail "xcodegen missing"
-fi
-
-if command -v xcrun >/dev/null 2>&1; then
-  echo "[release-readiness] iOS Swift parse"
-  xcrun --sdk iphoneos swiftc -parse \
-    mobile/ios/MDPreviewMobile/AppDelegate.swift \
-    mobile/ios/MDPreviewMobile/PreviewViewController.swift
-fi
-
-echo "[release-readiness] OK"
+echo "[release-readiness] OK (Android)"

@@ -54,19 +54,10 @@ if [ -f Makefile ] && grep -qE '^verify:' Makefile; then
   ran=1
 fi
 
-if [ -f release-sign.sh ]; then
-  echo "[agent-verify] release signing contract"
-  bash -n release-sign.sh scripts/release.sh
-  if ! grep -F 'remote-mac-sign/sign.sh' release-sign.sh >/dev/null; then
-    echo "[agent-verify] release-sign.sh must use the local-first remote-mac-sign/sign.sh entrypoint" >&2
-    exit 1
-  fi
-  if grep -F 'SIGN_SCRIPT="$HOME/.claude/skills/remote-mac-sign/sign_remote.sh"' release-sign.sh >/dev/null; then
-    echo "[agent-verify] release-sign.sh must not hard-code the remote-only signer" >&2
-    exit 1
-  fi
-  ran=1
-fi
+echo "[agent-verify] distribution policy"
+bash -n release-sign.sh scripts/release.sh bundle.sh hooks/pre-push
+python3 scripts/verify-distribution.py
+ran=1
 
 if [ -f src/main.rs ]; then
   echo "[agent-verify] desktop print stylesheet"
@@ -203,40 +194,10 @@ if [ -f scripts/verify-desktop-reading-tools.mjs ]; then
   fi
 fi
 
-if [ -x scripts/verify-sparkle-update.sh ]; then
-  echo "[agent-verify] Sparkle update"
-  scripts/verify-sparkle-update.sh
-  ran=1
-fi
-
 if [ -x scripts/verify-windows-self-update.sh ]; then
   echo "[agent-verify] Windows self-update"
   bash scripts/verify-windows-self-update.sh
   ran=1
-fi
-
-if [ -f mobile/ios/project.yml ]; then
-  if command -v xcodegen >/dev/null 2>&1 && command -v xcodebuild >/dev/null 2>&1; then
-    echo "[agent-verify] iOS xcodegen"
-    (
-      cd mobile/ios
-      xcodegen generate
-      if xcodebuild -project MDPreviewMobile.xcodeproj -scheme MDPreviewMobile -showdestinations 2>&1 | grep -q "not installed"; then
-        echo "[agent-verify] skip iOS build: Xcode reports the iOS platform is not installed"
-      else
-        xcodebuild -project MDPreviewMobile.xcodeproj -scheme MDPreviewMobile -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
-      fi
-    )
-    if command -v xcrun >/dev/null 2>&1; then
-      echo "[agent-verify] iOS Swift parse"
-      xcrun --sdk iphoneos swiftc -parse \
-        mobile/ios/MDPreviewMobile/AppDelegate.swift \
-        mobile/ios/MDPreviewMobile/PreviewViewController.swift
-    fi
-    ran=1
-  else
-    echo "[agent-verify] skip iOS build: xcodegen or xcodebuild missing"
-  fi
 fi
 
 if [ -f mobile/android/settings.gradle ]; then

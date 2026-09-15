@@ -1,3 +1,4 @@
+throw new Error("Apple distribution and package generation are suspended.");
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createRequire } from 'node:module';

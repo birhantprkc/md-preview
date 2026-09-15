@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+echo "Apple distribution and package generation are suspended." >&2
+exit 1
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

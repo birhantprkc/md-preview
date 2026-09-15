@@ -37,8 +37,7 @@
   "description": "Native cross-platform Markdown workbench with local document links, live character counts, content zoom, scroll continuity, New Markdown, multi-document tabs, reliable automatic save, offline Mermaid and KaTeX, search, and native print. Built with Rust and the system WebView, with no Electron.",
   "url": "https://vorojar.github.io/md-preview/",
   "downloadUrl": "https://github.com/vorojar/md-preview/releases",
-  "installUrl": "https://apps.apple.com/cn/app/local-markdown-preview/id6779451523",
-  "operatingSystem": "macOS, Windows, Linux, iOS, iPadOS, Android",
+  "operatingSystem": "Windows, Linux, Android",
   "applicationCategory": "DeveloperApplication",
   "softwareVersion": "1.4.1",
   "fileSize": "5.1MB",
@@ -46,8 +45,7 @@
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "author": { "@type": "Person", "name": "vorojar", "url": "https://github.com/vorojar" },
   "sameAs": [
-    "https://github.com/vorojar/md-preview",
-    "https://apps.apple.com/cn/app/local-markdown-preview/id6779451523"
+    "https://github.com/vorojar/md-preview"
   ],
   "sourceOrganization": { "@type": "Organization", "name": "GitHub", "url": "https://github.com/vorojar/md-preview" }
 }
@@ -354,8 +352,7 @@ footer a { color: inherit; }
   <p class="tagline" data-en="Follow local Markdown links in tabs, keep your reading position, inspect live counts, and zoom the document without launching a full IDE." data-zh="沿本地 Markdown 链接在标签间跳转，保留阅读位置、实时查看字数并缩放正文，不必启动完整 IDE。"></p>
   <div class="cta">
     <a class="cta-primary" href="https://github.com/vorojar/md-preview/releases/latest" data-en="Download Desktop" data-zh="下载桌面版"></a>
-    <a class="cta-secondary" href="https://apps.apple.com/cn/app/local-markdown-preview/id6779451523" data-en="Get iOS App" data-zh="获取 iOS 版"></a>
-    <a class="cta-secondary" href="https://github.com/vorojar/md-preview/releases/latest/download/MD-Preview-Android.apk" data-en="Download Android" data-zh="下载 Android"></a>
+    <a class="cta-secondary" href="https://github.com/vorojar/md-preview/releases/download/mobile-android-v1.0.10/MD-Preview-Android.apk" data-en="Download Android" data-zh="下载 Android"></a>
   </div>
 </header>
 
@@ -408,11 +405,6 @@ footer a { color: inherit; }
     <p data-en="Tab order and the active document return after restart. Inactive files load from disk only when selected." data-zh="重启后恢复标签顺序和活动文档；后台文件只在点击时从磁盘加载。"></p>
   </div>
   <div class="feature">
-    <div class="icon">&#9998;</div>
-    <h3 data-en="Finder to source edit" data-zh="Finder 直达源码编辑"></h3>
-    <p data-en="On macOS, create Markdown, text, JSON, or HTML from Finder. New Markdown opens directly in MD Preview's editor." data-zh="macOS 上可从 Finder 新建 Markdown、文本、JSON 或 HTML；Markdown 会直接进入 MD Preview 编辑器。"></p>
-  </div>
-  <div class="feature">
     <div class="icon">&#9889;</div>
     <h3 data-en="Instant startup" data-zh="秒开启动"></h3>
     <p data-en="Opens in milliseconds. No bundled Chromium, no heavy runtime. Uses your system's native WebView." data-zh="毫秒级启动。不打包 Chromium，不依赖沉重运行时。直接使用系统原生 WebView。"></p>
@@ -455,7 +447,7 @@ footer a { color: inherit; }
   <div class="feature">
     <div class="icon">&#127759;</div>
     <h3 data-en="Cross-platform" data-zh="跨平台"></h3>
-    <p data-en="macOS (WebKit), Windows (WebView2), Linux (WebKitGTK), plus native iPhone, iPad, and Android viewers." data-zh="macOS (WebKit)、Windows (WebView2)、Linux (WebKitGTK)，并提供原生 iPhone、iPad 和 Android 预览器。"></p>
+    <p data-en="Windows (WebView2), Linux (WebKitGTK), and a native Android viewer." data-zh="Windows (WebView2)、Linux (WebKitGTK)，并提供原生 Android 预览器。"></p>
   </div>
   <div class="feature">
     <div class="icon">&#9998;</div>
@@ -465,7 +457,7 @@ footer a { color: inherit; }
   <div class="feature">
     <div class="icon">&#128279;</div>
     <h3 data-en="Plays nice with your OS" data-zh="尊重操作系统"></h3>
-    <p data-en="Links open in your default browser. File association on Windows. Window position and size remembered between sessions. macOS and Windows updates are verified in-app." data-zh="链接走系统默认浏览器。Windows 文件关联。窗口位置/大小退出时记住。macOS 和 Windows 更新都在应用内校验。"></p>
+    <p data-en="Links open in your default browser. File association on Windows. Window position and size remembered between sessions. Windows updates are verified in-app." data-zh="链接走系统默认浏览器。Windows 文件关联。窗口位置/大小退出时记住。Windows 更新在应用内校验。"></p>
   </div>
 </section>
 
@@ -502,17 +494,15 @@ footer a { color: inherit; }
 
 <section class="install">
   <h2 data-en="Install" data-zh="安装"></h2>
+  <p data-en="macOS, iOS, and iPadOS downloads are currently unavailable." data-zh="macOS、iOS 和 iPadOS 下载已暂停。"></p>
   <div class="install-steps">
-    <p><strong>macOS</strong> — <span data-en="Download the notarized DMG, drag to Applications, then open once. If macOS asks, enable MD Preview under Finder Extensions." data-zh="下载已公证 DMG，拖到“应用程序”并打开一次；如 macOS 提示，请在 Finder 扩展中启用 MD Preview。"></span></p>
     <p><strong>Windows</strong> — <span data-en="Download the standalone EXE and run it." data-zh="下载单文件 EXE，直接运行。"></span></p>
     <p><strong>Linux</strong> — <span data-en="Download tar.gz, extract, run" data-zh="下载 tar.gz，解压，运行"></span> <code>./md-preview</code></p>
-    <p><strong>iOS / iPadOS</strong> — <span data-en="Install Local Markdown Preview from the App Store." data-zh="从 App Store 安装 Local Markdown Preview。"></span></p>
     <p><strong>Android</strong> — <span data-en="Download APK, install, open Markdown files." data-zh="下载 APK，安装后打开 Markdown 文件。"></span></p>
   </div>
   <div class="cta" style="margin-top: 24px;">
     <a class="cta-primary" href="https://github.com/vorojar/md-preview/releases/latest" data-en="Download Desktop" data-zh="下载桌面版"></a>
-    <a class="cta-secondary" href="https://apps.apple.com/cn/app/local-markdown-preview/id6779451523" data-en="Get iOS App" data-zh="获取 iOS 版"></a>
-    <a class="cta-secondary" href="https://github.com/vorojar/md-preview/releases/latest/download/MD-Preview-Android.apk" data-en="Download Android" data-zh="下载 Android"></a>
+    <a class="cta-secondary" href="https://github.com/vorojar/md-preview/releases/download/mobile-android-v1.0.10/MD-Preview-Android.apk" data-en="Download Android" data-zh="下载 Android"></a>
   </div>
 </section>
 

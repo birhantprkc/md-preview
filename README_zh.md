@@ -1,12 +1,13 @@
 # MD Preview
 
+> Apple 平台（macOS / iOS / iPadOS）下载、构建打包和签名发布已暂停。下文 Apple 功能描述仅记录保留的源码能力。
+
 **[English](README.md) · 简体中文**
 
 [![GitHub stars](https://img.shields.io/github/stars/vorojar/md-preview)](https://github.com/vorojar/md-preview/stargazers)
 [![Release](https://img.shields.io/github/v/release/vorojar/md-preview)](https://github.com/vorojar/md-preview/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux%20%7C%20iOS%20%7C%20Android-lightgrey)](https://github.com/vorojar/md-preview/releases)
-[![App Store](https://img.shields.io/badge/App%20Store-Local%20Markdown%20Preview-blue?logo=appstore)](https://apps.apple.com/cn/app/local-markdown-preview/id6779451523)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android-lightgrey)](https://github.com/vorojar/md-preview/releases)
 [![Binary size](https://img.shields.io/badge/binary-~5MB-green)](https://github.com/vorojar/md-preview/releases)
 
 > 多份 Markdown，一个轻量窗口。沿本地文档链接跳转、查看统计、缩放正文并自动保存编辑，不必启动一整个 IDE。
@@ -45,13 +46,11 @@ AI 编程工具现在会生成大量 Markdown：`README.md`、`plan.md`、任务
 
 | 平台 | 包名 | 说明 |
 |---|---|---|
-| macOS | `MD-Preview-macOS-universal.dmg` | Apple Silicon 和 Intel 通用。Release 版本会签名、公证。 |
 | Windows | `MD-Preview-windows-x64.exe` | 单文件应用。应用内更新会下载新版 exe，校验 SHA-256，退出后替换自己并重启。 |
 | Linux | `MD-Preview-linux-x64.tar.gz` | 需要系统 WebKitGTK 运行时。 |
-| iOS / iPadOS | [App Store 上的 Local Markdown Preview](https://apps.apple.com/cn/app/local-markdown-preview/id6779451523) | 原生 iPhone / iPad 预览器，可从“文件”和 iOS 分享面板打开 Markdown。 |
 | Android | `MD-Preview-Android.apk` | 原生 Android 预览器，可从文件管理器、微信、企业微信和分享面板打开 Markdown。 |
 
-Android 版本以单独的 mobile release 发布，例如 [mobile-android-v1.0.10](https://github.com/vorojar/md-preview/releases/tag/mobile-android-v1.0.10)。iOS 版本已经在 App Store 上架，名称为 [Local Markdown Preview](https://apps.apple.com/cn/app/local-markdown-preview/id6779451523)。
+Android 版本以单独的 mobile release 发布，例如 [mobile-android-v1.0.10](https://github.com/vorojar/md-preview/releases/tag/mobile-android-v1.0.10)。
 
 也可以从源码构建：
 
@@ -60,14 +59,6 @@ git clone https://github.com/vorojar/md-preview.git
 cd md-preview
 cargo build --release
 ./target/release/md-preview README.md
-```
-
-本地打包 macOS `.app`：
-
-```bash
-chmod +x bundle.sh
-./bundle.sh
-cp -r "target/MD Preview.app" /Applications/
 ```
 
 ## 使用
@@ -215,7 +206,7 @@ cargo test
 cargo build --release
 ```
 
-CI 会构建 macOS、Windows、Linux。推送匹配 `v*` 的 tag 后，GitHub Actions 会产出 macOS DMG、Windows 单文件 EXE 和 Linux tarball。
+CI 和桌面发布仅构建 Windows、Linux；Android 单独发布。
 
 维护者发版流程：
 
@@ -223,7 +214,7 @@ CI 会构建 macOS、Windows、Linux。推送匹配 `v*` 的 tag 后，GitHub Ac
 scripts/release.sh v1.2.3
 ```
 
-脚本会前台执行验证、推送 `master` 和 tag、等待 GitHub Actions、签名/公证/staple macOS DMG、上传 `appcast.xml`，并验证最终 Release assets。
+脚本执行验证、推送 `master` 和 tag、等待 GitHub Actions，并验证 Windows 和 Linux 发布附件。
 
 ## 许可证
 

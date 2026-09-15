@@ -56,16 +56,6 @@ jobs:
           name: md-preview-windows-x64
           path: target/release/md-preview.exe
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Build (release)
-        run: cargo build --release
-      - name: Test document handling and launch forwarding
-        run: cargo test
-
   build-linux:
     runs-on: ubuntu-latest
     steps:

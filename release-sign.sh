@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+echo "Apple distribution and package generation are suspended." >&2
+exit 1
 # release-sign.sh <tag>
 #
 # One-shot post-tag step for macOS distribution.
