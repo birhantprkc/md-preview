@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.2
+
+- Fixed Windows crashes when cold-starting with a large Markdown document or restoring one from the previous session. The initial WebView page is now independent of document size; content loads after the page is ready, avoiding WebView2’s 2 MiB HTML limit.
+- Preserved `--edit` and queued file-open requests until the startup page is ready.
+- Kept unreadable restored files in a recoverable error tab with Open File and Close Tab actions. WebView initialization errors on Windows now display an explicit message instead of aborting.
+- Added real Windows WebView2 regression checks for 3 MiB files, session restoration, Chinese extended-length paths, missing files, invalid directory paths, and stale instance records.
+- This release provides Windows and Linux packages. Apple platform downloads and package generation remain suspended.
+
 ## 1.4.1
 
 - Fixed repeated autosave interruptions in synchronized folders by comparing disk content, ignoring delayed identical writes, and releasing the session lock before showing external-change warnings. Genuine external edits still pause autosave to protect unsaved text.
