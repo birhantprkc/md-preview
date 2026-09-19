@@ -35,15 +35,16 @@ async function run(name, args, saved, check) {
  let output=''; child.stdout.on('data',d=>output+=d);child.stderr.on('data',d=>output+=d);
  let launchError; child.on('error',e=>launchError=e);
  let browser;
+ let connectionError;
  try {
   const deadline=Date.now()+60000;
   while(!browser && Date.now()<deadline){
    if(launchError) throw launchError;
    if(child.exitCode!==null) throw new Error(`${name}: process exited ${child.exitCode}: ${output}`);
    try { browser=await chromium.connectOverCDP(`http://127.0.0.1:${debugPort}`,{timeout:1500}); }
-   catch { await new Promise(r=>setTimeout(r,300)); }
+   catch (error) { connectionError=error.message; await new Promise(r=>setTimeout(r,300)); }
   }
-  assert.ok(browser, `${name}: CDP unavailable: ${output}`);
+  assert.ok(browser, `${name}: CDP unavailable: ${connectionError}; ${output}`);
   const context=browser.contexts()[0];
   let page;
   while(Date.now()<deadline){page=context.pages()[0];if(page)break;await new Promise(r=>setTimeout(r,100));}
@@ -53,6 +54,11 @@ async function run(name, args, saved, check) {
   await check(page,env,config);
   assert.equal(child.exitCode,null, `${name}: app crashed`);
   console.log(`PASS ${name}`);
+ } catch(error) {
+  const diagnostic=spawnSync('powershell',['-NoProfile','-Command',
+   "Get-Process md-preview,msedgewebview2 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,MainWindowTitle | Format-Table -AutoSize"],{encoding:'utf8'});
+  console.error(diagnostic.stdout, diagnostic.stderr);
+  throw error;
  } finally {
   if(child.exitCode===null) spawnSync('taskkill',['/pid',String(child.pid),'/t','/f']);
   if(browser) await browser.close().catch(()=>{});

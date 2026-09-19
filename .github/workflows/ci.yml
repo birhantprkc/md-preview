@@ -19,7 +19,19 @@ jobs:
       - name: Test document handling and launch forwarding
         run: cargo test
 
+      - name: Ensure WebView2 Runtime is installed
+        shell: pwsh
+        run: |
+          $runtime = Get-ChildItem "${env:ProgramFiles(x86)}/Microsoft/EdgeWebView/Application/*/msedgewebview2.exe" -ErrorAction SilentlyContinue
+          if (-not $runtime) {
+            Invoke-WebRequest 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile "$env:RUNNER_TEMP/WebView2Setup.exe"
+            $installer = Start-Process "$env:RUNNER_TEMP/WebView2Setup.exe" -ArgumentList '/silent','/install' -Wait -PassThru
+            Write-Host "WebView2 installer exit: $($installer.ExitCode)"
+          }
+          Get-ChildItem "${env:ProgramFiles(x86)}/Microsoft/EdgeWebView/Application/*/msedgewebview2.exe" -ErrorAction Stop
+
       - name: Verify real WebView2 startup and session recovery
+        timeout-minutes: 8
         shell: pwsh
         run: |
           npm install --prefix target/startup-qa --no-save playwright@1.58.2
