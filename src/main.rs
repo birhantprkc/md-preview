@@ -4620,6 +4620,17 @@ fn main() {
             }
         });
 
+    // Wry supplies its own browser options, which can mask WebView2's
+    // environment override. Honor explicit diagnostic arguments only when set.
+    #[cfg(target_os = "windows")]
+    let builder = {
+        use wry::WebViewBuilderExtWindows;
+        match std::env::var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS") {
+            Ok(arguments) => builder.with_additional_browser_args(&arguments),
+            Err(_) => builder,
+        }
+    };
+
     #[cfg(target_os = "linux")]
     let webview = {
         use tao::platform::unix::WindowExtUnix;

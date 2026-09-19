@@ -56,7 +56,7 @@ async function run(name, args, saved, check) {
   console.log(`PASS ${name}`);
  } catch(error) {
   const diagnostic=spawnSync('powershell',['-NoProfile','-Command',
-   "Get-Process md-preview,msedgewebview2 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,MainWindowTitle | Format-Table -AutoSize"],{encoding:'utf8'});
+   "Get-Process md-preview,msedgewebview2 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,MainWindowTitle | Format-Table -AutoSize; Get-CimInstance Win32_Process -Filter 'name = \"msedgewebview2.exe\"' | Select-Object CommandLine | Format-List"],{encoding:'utf8'});
   console.error(diagnostic.stdout, diagnostic.stderr);
   throw error;
  } finally {
