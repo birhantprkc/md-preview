@@ -105,7 +105,7 @@ src = Path("src/main.rs").read_text()
 
 if f'"softwareVersion": "{version}"' not in site:
     raise SystemExit("website structured data must match Cargo.toml version")
-for marker in ("Multi-document tabs", "Session restore", "Finder to source edit"):
+for marker in ("Multi-document tabs", "Session restore", "Cross-platform"):
     if marker not in site:
         raise SystemExit(f"website is missing v1.2 product marker: {marker}")
 for marker in ("Desktop tabs", "Session restore", "Finder workflow"):

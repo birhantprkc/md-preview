@@ -11,9 +11,11 @@ if (process.platform !== 'win32') throw new Error('This test requires real Windo
 const exe = resolve(process.argv[2] || 'target/release/md-preview.exe');
 const root = await mkdtemp(join(tmpdir(), 'mdp-startup-'));
 const large = join(root, '中文 大文件.md');
-const raw = '# START_MARKER\n\n' + 'plain text line\n'.repeat(209716) + '\nEND_MARKER\n';
+const start = '# START_MARKER\n\n', end = '\nEND_MARKER\n';
+const raw = start + 'plain text line\n'.repeat(209716).slice(0, 3*1024*1024-start.length-end.length) + end;
+assert.equal(Buffer.byteLength(raw), 3*1024*1024);
 await writeFile(large, raw);
-const small = join(root, 'small.md');
+const small = join(root, '中文 small.md');
 await writeFile(small, '# SMALL_MARKER');
 async function port() {
  const server = createServer(); await new Promise(r=>server.listen(0, '127.0.0.1', r));
@@ -79,5 +81,11 @@ await run('missing-history',[],[toNamespacedPath(join(root,'已删除.md'))],asy
 });
 await run('chinese-history',[],[toNamespacedPath(small)],async page=>{
  await page.waitForFunction(()=>document.querySelector('#editor').value.includes('SMALL_MARKER'));
+});
+await run('directory-history',[],[root],async page=>{
+ await page.waitForFunction(()=>document.body.classList.contains('missing'));
+ assert.ok((await page.locator('#preview').innerText()).includes(root));
+ await page.locator('#preview [data-close-tab]').click();
+ await page.waitForFunction(()=>document.body.classList.contains('empty'));
 });
 console.log('Windows startup regression suite passed');

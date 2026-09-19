@@ -4218,7 +4218,25 @@ fn render_active_document(
             }
         }
         Err(error) => {
-            show_warning_dialog(strings.cannot_read, &error.to_string());
+            if active.dirty {
+                show_warning_dialog(strings.cannot_read, &error.to_string());
+            } else {
+                // A bad restored path must leave the window usable, without a
+                // modal dialog during startup or stale content from another tab.
+                let html = format!(
+                    r#"<div class="missing-file"><h2>{}</h2><p>{}</p><code>{}</code><button type="button" data-open-file>{}</button><button type="button" data-close-tab="{}">{}</button></div>"#,
+                    html_escape_text(strings.cannot_read),
+                    html_escape_text(&error.to_string()),
+                    html_escape_text(&active.path.to_string_lossy()),
+                    html_escape_text(strings.open_file),
+                    active.id,
+                    html_escape_text(strings.close_tab),
+                );
+                let _ = webview.evaluate_script(&format!(
+                    "if(window.__setMissing)window.__setMissing('{}');",
+                    escape_js(&html)
+                ));
+            }
         }
     }
 
