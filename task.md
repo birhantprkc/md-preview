@@ -1,10 +1,21 @@
-# 进行中：#45 / #46 启动问题（2026-09-19）
+# 已发布 v1.4.2：#46 已关闭，#45 等待原场景确认（2026-09-19）
 
 - 目标：验证大文档冷启动与历史路径问题，修复确认的缺陷，发布 Windows/Linux v1.4.2 并回复 issues。
 - 非目标：恢复 Apple 发布、变更 Android、修改用户已有文件。
 - 验收：3 MiB 冷启动/历史恢复/运行中打开/--edit；缺失路径、中文扩展路径和残留单实例记录；Windows 实际 WebView2 验收与 Rust 测试。
 - #46 修复前测试失败：启动 HTML 6,359,544 bytes，超过 WebView2 2 MiB 限制。
 - #45 截图是诊断对话，尚不足以确认唯一根因；单独验证异常历史与残留 endpoint。
+
+## 交付与证据
+
+- 正式版本：[v1.4.2](https://github.com/vorojar/md-preview/releases/tag/v1.4.2)，tag 指向 `e54ca5ac61b7d1be477c6bbfe4fbcd9e1ee6c509`；仅 Windows EXE / Linux tar.gz。
+- 最终 CI `35433252739` Windows/Linux 构建与单测成功；Release run `35433255429` 成功；Windows 实际 WebView2 152.0.4191.66 的 7 场景全部通过：3 MiB 冷启动、恢复、--edit、运行中打开、缺失历史、中文扩展路径、错误目录历史并关闭标签。每次均预置残留锁/endpoint。
+- `cargo test` 43 项通过；`cargo check`、格式检查、完整 `scripts/verify.sh` 通过。修正了 Apple 下架后验证脚本仍要求官网展示 Finder 卡片的旧断言。
+- 首轮原生验收发现 Wry 默认参数掩盖 WebView2 环境参数，显式传入诊断参数后连接成功；目录场景按文件规范路径比较，避免 DOS 短路径造成测试误报。
+- Release 正文与 CHANGELOG 对应段落一致；下载附件大小、SHA-256 与 GitHub digest 一致；Windows 为 GUI x64 EXE，Linux tar 包含 md-preview。
+- 官网在线版本 1.4.2；Apple 下载继续停用；用户原有工作区改动完整保留。
+- #46 回复并关闭：https://github.com/vorojar/md-preview/issues/46#issuecomment-5740629618
+- #45 已回复：https://github.com/vorojar/md-preview/issues/45#issuecomment-5740629929 。现有截图无法确认具体失败路径或独立根因，已请报告者试新版并补充脱敏复现；保留开放，没有把无法复现当作不存在。
 
 ---
 
