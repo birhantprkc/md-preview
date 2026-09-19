@@ -19,6 +19,13 @@ jobs:
       - name: Test document handling and launch forwarding
         run: cargo test
 
+      - name: Verify real WebView2 startup and session recovery
+        shell: pwsh
+        run: |
+          npm install --prefix target/startup-qa --no-save playwright@1.58.2
+          $env:NODE_PATH = "$pwd/target/startup-qa/node_modules"
+          node scripts/verify-windows-startup.mjs
+
       - name: Verify GUI subsystem (no console window)
         shell: pwsh
         run: |

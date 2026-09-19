@@ -2334,6 +2334,23 @@ mod tests {
     }
 
     #[test]
+    fn large_document_startup_stays_below_webview2_html_limit() {
+        let dir = temp_test_dir("startup-large");
+        let file = dir.join("中文 large.md");
+        fs::write(&file, "x".repeat(3 * 1024 * 1024)).unwrap();
+        let mut session = DocumentSession::default();
+        session.open(file, true);
+        let page = build_startup_page(&Strings::for_lang(Lang::En), false);
+        assert!(
+            page.len() < 2 * 1024 * 1024,
+            "startup HTML has {} bytes",
+            page.len()
+        );
+        assert!(session.active().unwrap().edit_on_open);
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
     fn dollar_math_is_protected_from_markdown_escapes() {
         let html = md_to_html(r"$\{x\}$");
 
@@ -4213,6 +4230,20 @@ fn render_active_document(
     update_window_title(window, session);
 }
 
+// WebView2 NavigateToString has a 2 MiB limit. Never include document or
+// persisted path data in this page; load the active tab after the ready IPC.
+fn build_startup_page(strings: &Strings, native_updater_enabled: bool) -> String {
+    build_page(
+        &empty_preview_html(strings, &[]),
+        "",
+        None,
+        EnhanceFlags::default(),
+        strings,
+        true,
+        native_updater_enabled,
+    )
+}
+
 fn main() {
     apply_linux_webkit_compat_env();
 
@@ -4333,63 +4364,8 @@ fn main() {
 
     let recent_files: Arc<Mutex<Vec<PathBuf>>> = Arc::new(Mutex::new(load_recent_files()));
 
-    let mut initial_flags = EnhanceFlags::default();
-    let initial_page = match initial_session.active().cloned() {
-        Some(tab) => match fs::read_to_string(&tab.path) {
-            Ok(raw) => {
-                remember_recent_file(&recent_files, &tab.path);
-                let html_body = md_to_html_with_base(&raw, tab.path.parent());
-                let base_href = base_href_for_file(&tab.path);
-                initial_flags = enhance_flags_for(&raw);
-                build_page(
-                    &html_body,
-                    &raw,
-                    base_href.as_deref(),
-                    initial_flags,
-                    &strings,
-                    false,
-                    native_updater_enabled,
-                )
-            }
-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-                if let Some(active) = initial_session.active_mut() {
-                    active.missing = true;
-                }
-                build_page(
-                    &missing_preview_html(tab.id, &tab.path, &strings),
-                    "",
-                    None,
-                    EnhanceFlags::default(),
-                    &strings,
-                    false,
-                    native_updater_enabled,
-                )
-            }
-            Err(error) => build_page(
-                &format!(
-                    r#"<div class="empty"><div class="icon">#</div><div>{}: {}</div><button class="empty-open" type="button" data-open-file>{}</button></div>"#,
-                    html_escape_text(strings.cannot_read),
-                    html_escape_text(&error.to_string()),
-                    html_escape_text(strings.open_file)
-                ),
-                "",
-                None,
-                EnhanceFlags::default(),
-                &strings,
-                true,
-                native_updater_enabled,
-            ),
-        },
-        None => build_page(
-            &empty_preview_html(&strings, &recent_files.lock().unwrap()),
-            "",
-            None,
-            EnhanceFlags::default(),
-            &strings,
-            true,
-            native_updater_enabled,
-        ),
-    };
+    let initial_page = build_startup_page(&strings, native_updater_enabled);
+    let initial_flags = EnhanceFlags::default();
 
     persist_session(&initial_session);
     let document_session = Arc::new(Mutex::new(initial_session));
@@ -4637,24 +4613,16 @@ fn main() {
         builder.build_gtk(vbox).expect("failed to build webview")
     };
     #[cfg(not(target_os = "linux"))]
-    let webview = builder.build(&window).expect("failed to build webview");
+    let webview = match builder.build(&window) {
+        Ok(webview) => webview,
+        Err(error) => {
+            eprintln!("Could not initialize WebView: {error}");
+            show_warning_dialog("Could Not Open MD Preview", &error.to_string());
+            return;
+        }
+    };
     bench_log("webview_built");
     let session_for_event = Arc::clone(&document_session);
-    update_tabs(&webview, &session_for_event.lock().unwrap());
-    if session_for_event
-        .lock()
-        .unwrap()
-        .active()
-        .map(|tab| tab.edit_on_open && !tab.missing)
-        .unwrap_or(false)
-    {
-        let _ = webview
-            .evaluate_script("if(window.__mdPreviewEnterEdit)window.__mdPreviewEnterEdit();");
-        if let Some(tab) = session_for_event.lock().unwrap().active_mut() {
-            tab.edit_on_open = false;
-        }
-    }
-
     // hljs + extra language packs aren't part of first-paint HTML anymore.
     // We push them in via evaluate_script the moment the webview tells us
     // it's painted (IPC 'ready'). Keeps ~125KB out of the HTML-parse critical
@@ -4668,19 +4636,10 @@ fn main() {
     // File watcher state
     let watcher_holder: Arc<Mutex<Option<notify::RecommendedWatcher>>> = Arc::new(Mutex::new(None));
     let watcher_for_event = Arc::clone(&watcher_holder);
-    let initial_watch_path = session_for_event
-        .lock()
-        .unwrap()
-        .active()
-        .map(|tab| tab.path.clone());
-    install_file_watcher(
-        &watcher_holder,
-        &proxy,
-        &last_self_write,
-        initial_watch_path,
-    );
 
     let mut loaded_enhancers = EnhanceFlags::default();
+    let mut page_ready = false;
+    let mut pending_launches = Vec::new();
     let mut pending_window_close = false;
     let mut warned_external_change: Option<PathBuf> = None;
     let mut pending_external_change: Option<PathBuf> = None;
@@ -4746,6 +4705,11 @@ fn main() {
                 }
             }
             TaoEvent::UserEvent(UserEvent::OpenPaths(paths, edit_on_open)) => {
+                if !page_ready {
+                    pending_launches.push((paths, edit_on_open));
+                    return;
+                }
+
                 window.set_minimized(false);
                 window.set_focus();
                 if paths.is_empty() { return; }
@@ -5043,13 +5007,21 @@ fn main() {
                 // this, even in bench mode, so subsequent panes would still
                 // highlight — bench just exits right after measuring.
                 let _ = webview.evaluate_script(&hljs_bootstrap);
-                let flags = *enhance_flags.lock().unwrap();
-                for js in build_enhancer_bootstrap(flags, loaded_enhancers) {
-                    let _ = webview.evaluate_script(&js);
+                if !page_ready {
+                    page_ready = true;
+                    let mut session = session_for_event.lock().unwrap();
+                    render_active_document(
+                        &webview, &window, &mut session, &recent_files,
+                        &enhance_flags, &mut loaded_enhancers, &strings,
+                    );
+                    install_file_watcher(
+                        &watcher_holder, &proxy, &last_self_write,
+                        session.active().map(|tab| tab.path.clone()),
+                    );
                 }
-                loaded_enhancers.math |= flags.math;
-                loaded_enhancers.mermaid |= flags.mermaid;
-                update_tabs(&webview, &session_for_event.lock().unwrap());
+                for (paths, edit) in pending_launches.drain(..) {
+                    let _ = proxy.send_event(UserEvent::OpenPaths(paths, edit));
+                }
                 if bench {
                     eprintln!("[bench] +{}ms ready", t0.elapsed().as_millis());
                     *control_flow = ControlFlow::Exit;
