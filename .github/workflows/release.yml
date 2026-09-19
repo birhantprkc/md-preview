@@ -27,6 +27,11 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Verify real WebView2 startup and session recovery
+        timeout-minutes: 8
+        shell: pwsh
+        run: ./scripts/verify-windows-startup.ps1
+
       - name: Package
         shell: bash
         run: |

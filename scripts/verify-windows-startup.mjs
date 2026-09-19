@@ -1,6 +1,6 @@
 // Runs the actual release executable and inspects its WebView2 via local CDP.
 import { createRequire } from 'node:module';
-import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, toNamespacedPath } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -90,7 +90,7 @@ await run('chinese-history',[],[toNamespacedPath(small)],async page=>{
 });
 await run('directory-history',[],[root],async page=>{
  await page.waitForFunction(()=>document.body.classList.contains('missing'));
- assert.ok((await page.locator('#preview').innerText()).includes(root));
+ assert.equal(await realpath(await page.locator('#preview code').innerText()), await realpath(root));
  await page.locator('#preview [data-close-tab]').click();
  await page.waitForFunction(()=>document.body.classList.contains('empty'));
 });
